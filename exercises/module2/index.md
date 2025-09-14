@@ -37,7 +37,7 @@ By the end of this module, you will be able to:
 Choose one of the following half-baked C# console apps to enhance. If you finish early, try another or attempt a stretch goal!
 
 ### 1. Task Manager
-Location: `demos/TaskManager`
+Location: [demos/TaskManager on GitHub](https://github.com/dvwl/cu3627-gen-ai-course/tree/main/demos/TaskManager)
 
 **Features:** Add/view/delete tasks (basic implementation only)
 
@@ -51,7 +51,7 @@ Location: `demos/TaskManager`
 ---
 
 ### 2. Inventory System
-Location: `demos/InventorySystem`
+Location: [demos/InventorySystem on GitHub](https://github.com/dvwl/cu3627-gen-ai-course/tree/main/demos/InventorySystem)
 
 **Features:** Add/view items, update quantity (basic implementation only)
 
@@ -65,7 +65,7 @@ Location: `demos/InventorySystem`
 ---
 
 ### 3. Data Parser
-Location: `demos/DataParser`
+Location: [demos/DataParser on GitHub](https://github.com/dvwl/cu3627-gen-ai-course/tree/main/demos/DataParser)
 
 **Features:** Parse CSV file and display results (basic implementation only)
 
