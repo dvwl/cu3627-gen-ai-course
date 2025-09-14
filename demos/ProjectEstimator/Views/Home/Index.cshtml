@@ -1,0 +1,250 @@
+@model ProjectEstimator.Models.Project
+@{
+    ViewData["Title"] = "Project Estimation Demo";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="display-4">@Model.Name</h1>
+            <p class="lead">@Model.Description</p>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Tasks</h5>
+                    <h2 class="text-primary">@ViewBag.ProjectSummary.TotalTasks</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Expected Hours</h5>
+                    <h2 class="text-success">@ViewBag.ProjectSummary.TotalExpectedHours.ToString("F1")</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Std Deviation</h5>
+                    <h2 class="text-warning">@ViewBag.ProjectSummary.ProjectStandardDeviation.ToString("F1")</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Completed</h5>
+                    <h2 class="text-info">@ViewBag.ProjectSummary.CompletedTasks</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-gantt"></i> Project Gantt Chart</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mermaid-container">
+                        <div class="mermaid" id="ganttChart">@ViewBag.GanttChart</div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="copyMermaidCode('ganttChart')">
+                            <i class="fas fa-copy"></i> Copy Mermaid Code
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-project-diagram"></i> Task Dependencies</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mermaid-container">
+                        <div class="mermaid" id="dependencyChart">@ViewBag.DependencyChart</div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="copyMermaidCode('dependencyChart')">
+                            <i class="fas fa-copy"></i> Copy Mermaid Code
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-tasks"></i> Project Tasks</h5>
+                    <a href="@Url.Action("Create", "Tasks")" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add New Task
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.Tasks.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Task Name</th>
+                                        <th>Status</th>
+                                        <th>Optimistic</th>
+                                        <th>Most Likely</th>
+                                        <th>Pessimistic</th>
+                                        <th>Expected</th>
+                                        <th>Std Dev</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var task in Model.Tasks.OrderBy(t => t.Priority))
+                                    {
+                                        <tr class="@(task.IsOnCriticalPath ? "table-warning" : "")">
+                                            <td>
+                                                <strong>@task.Name</strong>
+                                                @if (task.IsOnCriticalPath)
+                                                {
+                                                    <span class="badge bg-warning text-dark">Critical Path</span>
+                                                }
+                                                @if (task.Dependencies.Any())
+                                                {
+                                                    <br><small class="text-muted">
+                                                        Depends on: @string.Join(", ", task.Dependencies.Select(d => d.Name))
+                                                    </small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge @GetStatusBadgeClass(task.Status)">
+                                                    @task.Status
+                                                </span>
+                                            </td>
+                                            <td>@task.OptimisticHours.ToString("F1")h</td>
+                                            <td>@task.MostLikelyHours.ToString("F1")h</td>
+                                            <td>@task.PessimisticHours.ToString("F1")h</td>
+                                            <td><strong>@task.ExpectedHours.ToString("F1")h</strong></td>
+                                            <td>@task.StandardDeviation.ToString("F1")h</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="@Url.Action("Details", "Tasks", new { id = task.Id })" class="btn btn-outline-info">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("Edit", "Tasks", new { id = task.Id })" class="btn btn-outline-primary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("Delete", "Tasks", new { id = task.Id })" class="btn btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-tasks fa-3x mb-3"></i>
+                            <p>No tasks yet. <a href="@Url.Action("Create", "Tasks")">Create your first task</a> to get started.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-calculator"></i> Three-Point Estimation Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6>Optimistic Total</h6>
+                            <p class="h4 text-success">@ViewBag.ProjectSummary.TotalOptimisticHours.ToString("F1") hours</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Most Likely Total</h6>
+                            <p class="h4 text-primary">@ViewBag.ProjectSummary.TotalMostLikelyHours.ToString("F1") hours</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>Pessimistic Total</h6>
+                            <p class="h4 text-danger">@ViewBag.ProjectSummary.TotalPessimisticHours.ToString("F1") hours</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6>68% Confidence Range</h6>
+                            <p class="h6">
+                                @((ViewBag.ProjectSummary.TotalExpectedHours - ViewBag.ProjectSummary.ProjectStandardDeviation).ToString("F1"))h - 
+                                @((ViewBag.ProjectSummary.TotalExpectedHours + ViewBag.ProjectSummary.ProjectStandardDeviation).ToString("F1"))h
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusBadgeClass(ProjectEstimator.Models.TaskStatus status)
+    {
+        return status switch
+        {
+            ProjectEstimator.Models.TaskStatus.NotStarted => "bg-secondary",
+            ProjectEstimator.Models.TaskStatus.InProgress => "bg-primary",
+            ProjectEstimator.Models.TaskStatus.Completed => "bg-success",
+            ProjectEstimator.Models.TaskStatus.Blocked => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        // Copy Mermaid code to clipboard
+        function copyMermaidCode(elementId) {
+            const element = document.getElementById(elementId);
+            let textToCopy = '';
+            
+            if (elementId === 'ganttChart') {
+                textToCopy = '@Html.Raw(ViewBag.GanttChart)';
+            } else if (elementId === 'dependencyChart') {
+                textToCopy = '@Html.Raw(ViewBag.DependencyChart)';
+            }
+            
+            navigator.clipboard.writeText(textToCopy).then(function() {
+                // Show success message
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                button.classList.add('btn-success');
+                button.classList.remove('btn-outline-secondary');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-secondary');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+}

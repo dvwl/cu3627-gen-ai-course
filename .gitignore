@@ -1,0 +1,39 @@
+# VSCode
+.vscode/*
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/extensions.json
+.vscode/*.code-snippets
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+# .NET Build outputs
+bin/
+obj/
+**/bin/
+**/obj/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# NuGet
+*.nuget.props
+*.nuget.targets
+*.nuget.cache
+
+# SQLite databases (for demo projects)
+*.db
+*.db-wal
+*.db-shm
+
+# User-specific files
+*.user
+*.userosscache
+*.sln.docstates

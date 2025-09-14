@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Project Estimator</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+        
+        .mermaid-container {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .mermaid {
+            text-align: center;
+        }
+        
+        .progress {
+            border-radius: 10px;
+        }
+        
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        
+        .table-warning {
+            background-color: rgba(255, 193, 7, 0.1) !important;
+        }
+        
+        .btn-group-sm > .btn, .btn-sm {
+            font-size: 0.875rem;
+        }
+        
+        .badge {
+            font-size: 0.75em;
+        }
+        
+        footer {
+            margin-top: 3rem;
+            padding: 2rem 0;
+            border-top: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="@Url.Action("Index", "Home")">
+                <i class="fas fa-chart-gantt"></i> Project Estimator
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Home")">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Index", "Tasks")">
+                            <i class="fas fa-tasks"></i> Tasks
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="@Url.Action("Create", "Tasks")">
+                            <i class="fas fa-plus"></i> Add Task
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-question-circle"></i> Help
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#pertModal">PERT Formula</a></li>
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">About</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main role="main" class="py-4">
+        @RenderBody()
+    </main>
+
+    <footer class="bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Project Estimator Demo</h5>
+                    <p class="text-muted mb-0">
+                        A demonstration of three-point estimation using PERT methodology for software project management.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted mb-0">
+                        <small>
+                            Built with ASP.NET Core 8 | 
+                            <a href="https://mermaid.js.org/" target="_blank" class="text-decoration-none">Mermaid Charts</a> | 
+                            <a href="https://getbootstrap.com/" target="_blank" class="text-decoration-none">Bootstrap 5</a>
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- PERT Formula Modal -->
+    <div class="modal fade" id="pertModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">PERT Formula Reference</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Three-Point Estimation (PERT)</h6>
+                    <p>Program Evaluation and Review Technique uses three time estimates to calculate expected duration:</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Expected Time (TE)</h6>
+                            <code>TE = (O + 4M + P) ÷ 6</code>
+                            <ul class="mt-2">
+                                <li><strong>O</strong> = Optimistic time (best case)</li>
+                                <li><strong>M</strong> = Most likely time (realistic)</li>
+                                <li><strong>P</strong> = Pessimistic time (worst case)</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Standard Deviation (σ)</h6>
+                            <code>σ = (P - O) ÷ 6</code>
+                            <p class="mt-2 mb-0">Measures uncertainty in the estimate.</p>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mt-3">Confidence Intervals</h6>
+                    <ul>
+                        <li><strong>68%:</strong> TE ± σ</li>
+                        <li><strong>95%:</strong> TE ± 2σ</li>
+                        <li><strong>99.7%:</strong> TE ± 3σ</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">About Project Estimator</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        This demo application demonstrates three-point estimation techniques commonly used in 
+                        software project management and estimation.
+                    </p>
+                    <h6>Features:</h6>
+                    <ul>
+                        <li>PERT three-point estimation calculations</li>
+                        <li>Task dependency management</li>
+                        <li>Critical path identification</li>
+                        <li>Mermaid Gantt chart generation</li>
+                        <li>Project timeline visualization</li>
+                    </ul>
+                    <p class="mb-0">
+                        <small class="text-muted">
+                            This is an educational demo for the Software Effort Estimation course.
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Mermaid JS -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

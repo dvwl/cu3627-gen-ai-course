@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <i class="fas fa-exclamation-triangle fa-4x text-danger mb-3"></i>
+                    <h2 class="text-danger">Oops! Something went wrong</h2>
+                    <p class="lead">We encountered an unexpected error while processing your request.</p>
+                    <div class="mt-4">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                            <i class="fas fa-home"></i> Return to Dashboard
+                        </a>
+                        <a href="@Url.Action("Index", "Tasks")" class="btn btn-outline-secondary ms-2">
+                            <i class="fas fa-tasks"></i> View Tasks
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

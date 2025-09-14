@@ -1,0 +1,62 @@
+remote_theme: just-the-docs/just-the-docs
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Jekyll plugins
+plugins:
+  - jekyll-remote-theme
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Navigation structure
+header_pages:
+  - index.md
+  - exercises/index.md
+
+# Course information
+course:
+  code: "CU3627"
+  title: "Building Software with GenAI - GitHub CoPilot for C# Developers"
+  duration: "1 day (9am - 5pm)"
+  provider: "SBL-Khas 10001585903"
+
+# GitHub repository
+repository: "dvwl/cu3627-gen-ai-course"
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - demos/
+
+# Just the Docs specific settings
+skin: auto
+search_enabled: true
+heading_anchors: true
+nav_sort: case_insensitive
+back_to_top: true
+back_to_top_text: "Back to top"
+
+# Color scheme
+color_scheme: light
+
+# Site metadata
+title: "Building Software with GenAI - GitHub CoPilot for C# Developers (CU3627)"
+description: "Hands-on exercises and materials for the Building Software with GenAI - GitHub CoPilot for C# Developers course by DreamCatcher Consulting Sdn Bhd - Learn techniques for developing projects with generative AI (GenAI)."
+author: "Ts. Daniel Vong"
+github_username: dvwl
+
+# Footer content
+footer_content: "Copyright &copy; 2025 Daniel Vong. Distributed by an <a href=\"https://github.com/dvwl/cu3627-gen-ai-course/tree/main/LICENSE\">MIT license.</a>"
+
+# Navigation structure
+nav_external_links:
+  - title: Course Info
+    url: https://www.dreamcatcher.asia/training/3627

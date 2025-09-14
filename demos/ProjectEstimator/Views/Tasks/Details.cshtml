@@ -1,0 +1,245 @@
+@model ProjectEstimator.Models.ProjectTask
+
+@{
+    ViewData["Title"] = "Task Details";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-tasks"></i> @Model.Name</h3>
+                    <div>
+                        @if (Model.IsOnCriticalPath)
+                        {
+                            <span class="badge bg-warning text-dark me-2">Critical Path</span>
+                        }
+                        <span class="badge @GetStatusBadgeClass(Model.Status)">@Model.Status</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5>Task Information</h5>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Description:</strong></td>
+                                    <td>@(string.IsNullOrEmpty(Model.Description) ? "No description provided" : Model.Description)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Priority:</strong></td>
+                                    <td>
+                                        <span class="badge @GetPriorityBadgeClass(Model.Priority)">
+                                            Priority @Model.Priority
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td>
+                                        <span class="badge @GetStatusBadgeClass(Model.Status)">
+                                            @Model.Status
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Dependencies:</strong></td>
+                                    <td>
+                                        @if (Model.Dependencies.Any())
+                                        {
+                                            @foreach (var dep in Model.Dependencies)
+                                            {
+                                                <span class="badge bg-secondary me-1">
+                                                    <a href="@Url.Action("Details", new { id = dep.Id })" class="text-white text-decoration-none">
+                                                        @dep.Name
+                                                    </a>
+                                                </span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No dependencies</span>
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Dependent Tasks:</strong></td>
+                                    <td>
+                                        @if (ViewBag.DependentTasks != null && ((List<ProjectEstimator.Models.ProjectTask>)ViewBag.DependentTasks).Any())
+                                        {
+                                            @foreach (var dep in (List<ProjectEstimator.Models.ProjectTask>)ViewBag.DependentTasks)
+                                            {
+                                                <span class="badge bg-info me-1">
+                                                    <a href="@Url.Action("Details", new { id = dep.Id })" class="text-white text-decoration-none">
+                                                        @dep.Name
+                                                    </a>
+                                                </span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No tasks depend on this one</span>
+                                        }
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <h5>Estimation Summary</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="text-center mb-3">
+                                        <h2 class="text-primary">@Model.ExpectedHours.ToString("F1")</h2>
+                                        <small class="text-muted">Expected Hours</small>
+                                    </div>
+                                    
+                                    <div class="progress mb-3" style="height: 20px;">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             style="width: @((Model.OptimisticHours / Model.PessimisticHours * 100).ToString("F0"))%">
+                                            <small>Optimistic</small>
+                                        </div>
+                                        <div class="progress-bar bg-primary" role="progressbar" 
+                                             style="width: @(((Model.MostLikelyHours - Model.OptimisticHours) / Model.PessimisticHours * 100).ToString("F0"))%">
+                                            <small>Most Likely</small>
+                                        </div>
+                                        <div class="progress-bar bg-danger" role="progressbar" 
+                                             style="width: @(((Model.PessimisticHours - Model.MostLikelyHours) / Model.PessimisticHours * 100).ToString("F0"))%">
+                                            <small>Pessimistic</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <td>Optimistic:</td>
+                                            <td class="text-end"><strong>@Model.OptimisticHours.ToString("F1")h</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Most Likely:</td>
+                                            <td class="text-end"><strong>@Model.MostLikelyHours.ToString("F1")h</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pessimistic:</td>
+                                            <td class="text-end"><strong>@Model.PessimisticHours.ToString("F1")h</strong></td>
+                                        </tr>
+                                        <tr class="border-top">
+                                            <td>Std Deviation:</td>
+                                            <td class="text-end"><strong>@Model.StandardDeviation.ToString("F1")h</strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @if (Model.IsOnCriticalPath)
+                    {
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="alert alert-warning">
+                                    <h5><i class="fas fa-exclamation-triangle"></i> Critical Path Analysis</h5>
+                                    <p class="mb-0">
+                                        This task is on the <strong>critical path</strong>, meaning any delay in this task will directly impact 
+                                        the overall project completion date. Consider:
+                                    </p>
+                                    <ul class="mb-0 mt-2">
+                                        <li>Allocating additional resources if behind schedule</li>
+                                        <li>Monitoring progress closely</li>
+                                        <li>Having contingency plans ready</li>
+                                        <li>Communicating any risks to stakeholders</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h5>PERT Calculations</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6>Expected Time Formula:</h6>
+                                            <code>TE = (O + 4M + P) ÷ 6</code>
+                                            <p class="mt-2 mb-0">
+                                                <strong>Calculation:</strong><br>
+                                                TE = (@Model.OptimisticHours.ToString("F1") + 4×@Model.MostLikelyHours.ToString("F1") + @Model.PessimisticHours.ToString("F1")) ÷ 6<br>
+                                                TE = @Model.ExpectedHours.ToString("F1") hours
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Standard Deviation Formula:</h6>
+                                            <code>σ = (P - O) ÷ 6</code>
+                                            <p class="mt-2 mb-0">
+                                                <strong>Calculation:</strong><br>
+                                                σ = (@Model.PessimisticHours.ToString("F1") - @Model.OptimisticHours.ToString("F1")) ÷ 6<br>
+                                                σ = @Model.StandardDeviation.ToString("F1") hours
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mt-3">
+                                        <div class="col-md-12">
+                                            <h6>Confidence Intervals:</h6>
+                                            <ul class="mb-0">
+                                                <li><strong>68% confidence:</strong> @((Model.ExpectedHours - Model.StandardDeviation).ToString("F1"))h - @((Model.ExpectedHours + Model.StandardDeviation).ToString("F1"))h</li>
+                                                <li><strong>95% confidence:</strong> @((Model.ExpectedHours - 2 * Model.StandardDeviation).ToString("F1"))h - @((Model.ExpectedHours + 2 * Model.StandardDeviation).ToString("F1"))h</li>
+                                                <li><strong>99.7% confidence:</strong> @((Model.ExpectedHours - 3 * Model.StandardDeviation).ToString("F1"))h - @((Model.ExpectedHours + 3 * Model.StandardDeviation).ToString("F1"))h</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <div>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Tasks
+                            </a>
+                            <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary">
+                                <i class="fas fa-home"></i> Dashboard
+                            </a>
+                        </div>
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Edit Task
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                                <i class="fas fa-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusBadgeClass(ProjectEstimator.Models.TaskStatus status)
+    {
+        return status switch
+        {
+            ProjectEstimator.Models.TaskStatus.NotStarted => "bg-secondary",
+            ProjectEstimator.Models.TaskStatus.InProgress => "bg-primary",
+            ProjectEstimator.Models.TaskStatus.Completed => "bg-success",
+            ProjectEstimator.Models.TaskStatus.Blocked => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+    
+    private string GetPriorityBadgeClass(int priority)
+    {
+        return priority switch
+        {
+            1 => "bg-danger",      // High priority
+            2 => "bg-warning",     // Medium-high priority
+            3 => "bg-info",        // Medium priority
+            _ => "bg-secondary"    // Low priority
+        };
+    }
+}

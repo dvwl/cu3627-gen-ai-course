@@ -1,0 +1,32 @@
+@{
+    ViewData["Title"] = "No Project Found";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-project-diagram fa-4x text-muted mb-4"></i>
+                    <h2 class="text-muted mb-3">Welcome to Project Estimator</h2>
+                    <p class="lead text-muted mb-4">
+                        No project found in the database. The application will create a sample project with some demo tasks to get you started.
+                    </p>
+                    <div class="alert alert-info">
+                        <strong>Getting Started:</strong>
+                        <ol class="text-start mt-2 mb-0">
+                            <li>The database will be initialized with sample data</li>
+                            <li>You can create new tasks using the "Add New Task" button</li>
+                            <li>Use three-point estimation (optimistic, most likely, pessimistic)</li>
+                            <li>Set up task dependencies to see the critical path</li>
+                            <li>View automatically generated Mermaid charts</li>
+                        </ol>
+                    </div>
+                    <a href="@Url.Action("Create", "Tasks")" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus"></i> Create Your First Task
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
