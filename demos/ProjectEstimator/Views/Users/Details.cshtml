@@ -1,0 +1,209 @@
+@model ProjectEstimator.Models.User
+
+@{
+    ViewData["Title"] = "Person Details";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Personnel</a></li>
+        <li class="breadcrumb-item active">@Model.Name</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="avatar-lg bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                    @Model.Name.Substring(0, 1).ToUpper()
+                </div>
+                <h4>@Model.Name</h4>
+                <p class="text-muted mb-2">@Model.Role</p>
+                <p class="text-muted">@Model.Department</p>
+                
+                @if (Model.IsActive)
+                {
+                    <span class="badge bg-success mb-3">Active</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary mb-3">Inactive</span>
+                }
+                
+                <div class="d-grid gap-2">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Edit Details
+                    </a>
+                    <a asp-action="Assignments" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                        <i class="bi bi-list-task"></i> View All Assignments
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">Contact Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <strong>Email:</strong><br>
+                    <a href="mailto:@Model.Email">@Model.Email</a>
+                </div>
+                <div class="mb-2">
+                    <strong>Department:</strong><br>
+                    @Model.Department
+                </div>
+                <div>
+                    <strong>Created:</strong><br>
+                    @Model.CreatedDate.ToString("MMM dd, yyyy")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Current Task Assignments</h5>
+            </div>
+            <div class="card-body">
+                @{
+                    var activeAssignments = Model.TaskAssignments.Where(ta => ta.IsActive).ToList();
+                }
+                
+                @if (!activeAssignments.Any())
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-inbox display-4 text-muted"></i>
+                        <h6 class="mt-3">No Active Assignments</h6>
+                        <p class="text-muted">@Model.Name is not currently assigned to any tasks.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Project</th>
+                                    <th>Role</th>
+                                    <th>Allocation</th>
+                                    <th>Assigned Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var assignment in activeAssignments.OrderByDescending(ta => ta.IsLeader))
+                                {
+                                    <tr>
+                                        <td>
+                                            <a asp-controller="Tasks" asp-action="Details" asp-route-id="@assignment.Task.Id" class="text-decoration-none">
+                                                @assignment.Task.Name
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">@assignment.Task.Project.Name</small>
+                                        </td>
+                                        <td>
+                                            @if (assignment.IsLeader)
+                                            {
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="bi bi-star-fill"></i> Leader
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-info">Member</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">@assignment.AllocationPercentage%</span>
+                                        </td>
+                                        <td>
+                                            <small>@assignment.AssignedDate.ToString("MMM dd, yyyy")</small>
+                                        </td>
+                                        <td>
+                                            <a asp-controller="Tasks" asp-action="Details" asp-route-id="@assignment.Task.Id" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (Model.TaskAssignments.Any(ta => !ta.IsActive))
+        {
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">Assignment History</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Role</th>
+                                    <th>Period</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var assignment in Model.TaskAssignments.Where(ta => !ta.IsActive).OrderByDescending(ta => ta.AssignedDate))
+                                {
+                                    <tr>
+                                        <td>@assignment.Task.Name</td>
+                                        <td>
+                                            @if (assignment.IsLeader)
+                                            {
+                                                <small class="text-warning">Leader</small>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted">Member</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                @assignment.AssignedDate.ToString("MMM dd, yyyy") - 
+                                                @(assignment.UnassignedDate?.ToString("MMM dd, yyyy") ?? "Present")
+                                            </small>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Personnel List
+    </a>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+        <i class="bi bi-pencil"></i> Edit
+    </a>
+    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+        <i class="bi bi-trash"></i> Delete
+    </a>
+</div>
+
+<style>
+    .avatar-lg {
+        width: 80px;
+        height: 80px;
+        font-size: 32px;
+        font-weight: bold;
+    }
+</style>

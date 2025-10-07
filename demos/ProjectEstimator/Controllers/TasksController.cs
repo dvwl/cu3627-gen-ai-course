@@ -36,7 +36,7 @@ public class TasksController : Controller
             .Include(t => t.Project)
             .Include(t => t.Dependencies)
             .FirstOrDefaultAsync(m => m.Id == id);
-            
+
         if (task == null) return NotFound();
 
         // Get tasks that depend on this task
@@ -66,10 +66,10 @@ public class TasksController : Controller
         var availableTasks = await _context.Tasks
             .Where(t => t.ProjectId == project.Id)
             .ToListAsync();
-            
+
         ViewBag.Project = project;
         ViewBag.AvailableTasks = availableTasks;
-        
+
         return View(new ProjectTask { ProjectId = project.Id });
     }
 
@@ -88,29 +88,29 @@ public class TasksController : Controller
 
             _context.Add(task);
             await _context.SaveChangesAsync();
-            
+
             // Add dependencies
             if (dependencyIds != null && dependencyIds.Length > 0)
             {
                 var dependencies = await _context.Tasks
                     .Where(t => dependencyIds.Contains(t.Id))
                     .ToListAsync();
-                    
+
                 task.Dependencies = dependencies;
                 await _context.SaveChangesAsync();
             }
-            
+
             return RedirectToAction(nameof(Index));
         }
-        
+
         var project = await _context.Projects.FirstOrDefaultAsync();
         var availableTasks = await _context.Tasks
             .Where(t => t.ProjectId == project!.Id)
             .ToListAsync();
-            
+
         ViewBag.Project = project;
         ViewBag.AvailableTasks = availableTasks;
-        
+
         return View(task);
     }
 
@@ -122,16 +122,16 @@ public class TasksController : Controller
         var task = await _context.Tasks
             .Include(t => t.Dependencies)
             .FirstOrDefaultAsync(t => t.Id == id);
-            
+
         if (task == null) return NotFound();
 
         var availableTasks = await _context.Tasks
             .Where(t => t.ProjectId == task.ProjectId && t.Id != task.Id)
             .ToListAsync();
-            
+
         ViewBag.AvailableTasks = availableTasks;
         ViewBag.CurrentDependencies = task.Dependencies.Select(d => d.Id).ToArray();
-        
+
         return View(task);
     }
 
@@ -154,28 +154,28 @@ public class TasksController : Controller
 
                 _context.Update(task);
                 await _context.SaveChangesAsync();
-                
+
                 // Update dependencies
                 var existingTask = await _context.Tasks
                     .Include(t => t.Dependencies)
                     .FirstOrDefaultAsync(t => t.Id == id);
-                    
+
                 if (existingTask != null)
                 {
                     existingTask.Dependencies.Clear();
-                    
+
                     if (dependencyIds != null && dependencyIds.Length > 0)
                     {
                         var dependencies = await _context.Tasks
                             .Where(t => dependencyIds.Contains(t.Id))
                             .ToListAsync();
-                            
+
                         foreach (var dep in dependencies)
                         {
                             existingTask.Dependencies.Add(dep);
                         }
                     }
-                    
+
                     await _context.SaveChangesAsync();
                 }
             }
@@ -192,13 +192,13 @@ public class TasksController : Controller
             }
             return RedirectToAction(nameof(Index));
         }
-        
+
         var availableTasks = await _context.Tasks
             .Where(t => t.ProjectId == task.ProjectId && t.Id != task.Id)
             .ToListAsync();
-            
+
         ViewBag.AvailableTasks = availableTasks;
-        
+
         return View(task);
     }
 
@@ -211,7 +211,7 @@ public class TasksController : Controller
             .Include(t => t.Project)
             .Include(t => t.Dependencies)
             .FirstOrDefaultAsync(m => m.Id == id);
-            
+
         if (task == null) return NotFound();
 
         // Get tasks that depend on this task
@@ -243,12 +243,12 @@ public class TasksController : Controller
     {
         return _context.Tasks.Any(e => e.Id == id);
     }
-    
+
     public IActionResult CreateProject()
     {
         return View();
     }
-    
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateProject([Bind("Name,Description,StartDate")] Project project)

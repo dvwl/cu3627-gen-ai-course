@@ -1,0 +1,185 @@
+@model ProjectEstimator.Models.User
+
+@{
+    ViewData["Title"] = "Delete Person";
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Personnel</a></li>
+        <li class="breadcrumb-item active">Delete @Model.Name</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> Confirm Deletion
+                </h4>
+            </div>
+            <div class="card-body">
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <div class="avatar-lg bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
+                            @Model.Name.Substring(0, 1).ToUpper()
+                        </div>
+                        <h5>@Model.Name</h5>
+                        <p class="text-muted">@Model.Role</p>
+                    </div>
+                    <div class="col-md-8">
+                        <h6>Person Details:</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Email:</strong></td>
+                                <td>@Model.Email</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Department:</strong></td>
+                                <td>@Model.Department</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Status:</strong></td>
+                                <td>
+                                    @if (Model.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Created:</strong></td>
+                                <td>@Model.CreatedDate.ToString("MMM dd, yyyy")</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                @{
+                    var activeAssignments = Model.TaskAssignments.Where(ta => ta.IsActive).ToList();
+                    var totalAssignments = Model.TaskAssignments.Count();
+                }
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Task Assignment Summary:</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>Active Assignments:</strong> @activeAssignments.Count</li>
+                            <li><strong>Total Assignments (All Time):</strong> @totalAssignments</li>
+                            <li><strong>Leading Tasks:</strong> @activeAssignments.Count(ta => ta.IsLeader)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        @if (activeAssignments.Any())
+                        {
+                            <div class="alert alert-warning">
+                                <h6><i class="bi bi-exclamation-triangle"></i> Warning</h6>
+                                <p class="mb-0">This person has <strong>@activeAssignments.Count active task assignment(s)</strong>. 
+                                You must unassign them from all tasks before deletion.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <h6><i class="bi bi-info-circle"></i> Safe to Delete</h6>
+                                <p class="mb-0">This person has no active task assignments and can be safely deleted.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (activeAssignments.Any())
+                {
+                    <h6>Active Assignments:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Project</th>
+                                    <th>Role</th>
+                                    <th>Assigned Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var assignment in activeAssignments)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a asp-controller="Tasks" asp-action="Details" asp-route-id="@assignment.Task.Id">
+                                                @assignment.Task.Name
+                                            </a>
+                                        </td>
+                                        <td>@assignment.Task.Project.Name</td>
+                                        <td>
+                                            @if (assignment.IsLeader)
+                                            {
+                                                <span class="badge bg-warning text-dark">Leader</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-info">Member</span>
+                                            }
+                                        </td>
+                                        <td>@assignment.AssignedDate.ToString("MMM dd, yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+                <hr>
+
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                            <i class="bi bi-eye"></i> View Details
+                        </a>
+                    </div>
+                    
+                    @if (!activeAssignments.Any())
+                    {
+                        <form asp-action="Delete" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete @Model.Name? This action cannot be undone.')">
+                                <i class="bi bi-trash"></i> Delete Person
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-danger" disabled title="Cannot delete - has active assignments">
+                            <i class="bi bi-trash"></i> Cannot Delete
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-lg {
+        width: 80px;
+        height: 80px;
+        font-size: 32px;
+        font-weight: bold;
+    }
+</style>

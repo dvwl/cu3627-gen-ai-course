@@ -1,0 +1,35 @@
+# Build and output directories
+bin/
+obj/
+.vs/
+.vscode/launch.json
+.vscode/tasks.json
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+*.log
+
+# Package files
+*.nupkg
+*.snupkg
+
+# Temporary files
+*.tmp
+*.temp
+
+# Generated files
+wwwroot/lib/
+node_modules/
+
+# IDE files
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

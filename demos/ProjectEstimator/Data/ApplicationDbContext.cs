@@ -9,6 +9,8 @@ public class ApplicationDbContext : DbContext
     
     public DbSet<Project> Projects { get; set; } = null!;
     public DbSet<ProjectTask> Tasks { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
+    public DbSet<TaskAssignment> TaskAssignments { get; set; } = null!;
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,5 +51,52 @@ public class ApplicationDbContext : DbContext
                 j => j.HasOne<ProjectTask>().WithMany().HasForeignKey("DependencyId"),
                 j => j.HasOne<ProjectTask>().WithMany().HasForeignKey("TaskId")
             );
+        
+        // Configure User entity
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.Department).HasMaxLength(50);
+            entity.Property(e => e.Role).IsRequired();
+            entity.Property(e => e.CreatedDate).IsRequired();
+            entity.Property(e => e.IsActive).IsRequired();
+            
+            // Index for performance
+            entity.HasIndex(e => e.Email);
+            entity.HasIndex(e => e.IsActive);
+        });
+        
+        // Configure TaskAssignment entity
+        modelBuilder.Entity<TaskAssignment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.IsLeader).IsRequired();
+            entity.Property(e => e.AllocationPercentage).IsRequired();
+            entity.Property(e => e.AssignedDate).IsRequired();
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            
+            // Foreign key relationships
+            entity.HasOne(e => e.User)
+                  .WithMany(u => u.TaskAssignments)
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+                  
+            entity.HasOne(e => e.Task)
+                  .WithMany(t => t.TaskAssignments)
+                  .HasForeignKey(e => e.TaskId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            
+            // Indexes for performance
+            entity.HasIndex(e => new { e.UserId, e.TaskId });
+            entity.HasIndex(e => e.IsLeader);
+            entity.HasIndex(e => e.AssignedDate);
+            
+            // Business rule: Only one leader per task per active assignment
+            entity.HasIndex(e => new { e.TaskId, e.IsLeader })
+                  .HasFilter("IsLeader = 1 AND UnassignedDate IS NULL")
+                  .IsUnique();
+        });
     }
 }

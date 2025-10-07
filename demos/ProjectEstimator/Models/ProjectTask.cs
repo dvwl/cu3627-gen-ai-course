@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProjectEstimator.Models;
 
@@ -39,6 +40,9 @@ public class ProjectTask
     public List<ProjectTask> Dependencies { get; set; } = new();
     public List<ProjectTask> Dependents { get; set; } = new();
     
+    // Personnel assignments - many-to-many relationship through TaskAssignment
+    public List<TaskAssignment> TaskAssignments { get; set; } = new();
+    
     // Calculated properties - PERT estimation
     public double ExpectedHours => (OptimisticHours + 4 * MostLikelyHours + PessimisticHours) / 6;
     public double StandardDeviation => (PessimisticHours - OptimisticHours) / 6;
@@ -52,6 +56,16 @@ public class ProjectTask
     
     public bool IsOnCriticalPath { get; set; }
     public double PercentComplete { get; set; }
+    
+    // Personnel-related computed properties
+    [NotMapped]
+    public List<User> AssignedUsers => TaskAssignments.Where(ta => ta.IsActive).Select(ta => ta.User).ToList();
+    [NotMapped]
+    public User? TaskLeader => TaskAssignments.FirstOrDefault(ta => ta.IsActive && ta.IsLeader)?.User;
+    [NotMapped]
+    public bool HasLeader => TaskAssignments.Any(ta => ta.IsActive && ta.IsLeader);
+    [NotMapped]
+    public int AssignedPersonnelCount => TaskAssignments.Count(ta => ta.IsActive);
 }
 
 public enum TaskStatus
